@@ -61,11 +61,17 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports) {
+
+module.exports = require("express");
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -101,37 +107,77 @@ function envConfig(env) {
 exports.default = Object.assign({}, defaultConfig, envConfig(process.env.NODE_ENV));
 
 /***/ }),
-/* 1 */
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = require("mongoose");
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _express = __webpack_require__(2);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.passwordReg = undefined;
 
-var _express2 = _interopRequireDefault(_express);
+var _joi = __webpack_require__(17);
 
-var _constants = __webpack_require__(0);
-
-var _constants2 = _interopRequireDefault(_constants);
-
-__webpack_require__(3);
-
-var _middlewares = __webpack_require__(5);
-
-var _middlewares2 = _interopRequireDefault(_middlewares);
+var _joi2 = _interopRequireDefault(_joi);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/* eslint-disable no-console */
+const passwordReg = exports.passwordReg = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
 
-const app = (0, _express2.default)();
+exports.default = {
+  signup: {
+    email: _joi2.default.string().email().required(),
+    password: _joi2.default.string().regex(passwordReg).required(),
+    firstName: _joi2.default.string().required(),
+    lastName: _joi2.default.string().required(),
+    userName: _joi2.default.string().required()
+  }
+};
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _express = __webpack_require__(0);
+
+var _express2 = _interopRequireDefault(_express);
+
+var _constants = __webpack_require__(1);
+
+var _constants2 = _interopRequireDefault(_constants);
+
+__webpack_require__(5);
+
+var _middlewares = __webpack_require__(6);
+
+var _middlewares2 = _interopRequireDefault(_middlewares);
+
+var _modules = __webpack_require__(11);
+
+var _modules2 = _interopRequireDefault(_modules);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const app = (0, _express2.default)(); /* eslint-disable no-console */
 
 (0, _middlewares2.default)(app);
 
 app.get('/', (req, res) => {
   res.send('Hello Node Api');
 });
+
+(0, _modules2.default)(app);
 
 app.listen(_constants2.default.PORT, err => {
   if (err) {
@@ -148,23 +194,17 @@ app.listen(_constants2.default.PORT, err => {
 });
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports) {
-
-module.exports = require("express");
-
-/***/ }),
-/* 3 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _mongoose = __webpack_require__(4);
+var _mongoose = __webpack_require__(2);
 
 var _mongoose2 = _interopRequireDefault(_mongoose);
 
-var _constants = __webpack_require__(0);
+var _constants = __webpack_require__(1);
 
 var _constants2 = _interopRequireDefault(_constants);
 
@@ -189,13 +229,7 @@ try {
 _mongoose2.default.connection.once('open', () => console.log('mongoose DB running'));
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-module.exports = require("mongoose");
-
-/***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -205,19 +239,19 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _morgan = __webpack_require__(6);
+var _morgan = __webpack_require__(7);
 
 var _morgan2 = _interopRequireDefault(_morgan);
 
-var _bodyParser = __webpack_require__(7);
+var _bodyParser = __webpack_require__(8);
 
 var _bodyParser2 = _interopRequireDefault(_bodyParser);
 
-var _compression = __webpack_require__(8);
+var _compression = __webpack_require__(9);
 
 var _compression2 = _interopRequireDefault(_compression);
 
-var _helmet = __webpack_require__(9);
+var _helmet = __webpack_require__(10);
 
 var _helmet2 = _interopRequireDefault(_helmet);
 
@@ -240,28 +274,198 @@ exports.default = app => {
 };
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
 module.exports = require("morgan");
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 module.exports = require("body-parser");
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
 module.exports = require("compression");
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = require("helmet");
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _user = __webpack_require__(12);
+
+var _user2 = _interopRequireDefault(_user);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = app => {
+  app.use('/api/v1/users', _user2.default);
+};
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _express = __webpack_require__(0);
+
+var _expressValidation = __webpack_require__(13);
+
+var _expressValidation2 = _interopRequireDefault(_expressValidation);
+
+var _user = __webpack_require__(14);
+
+var userController = _interopRequireWildcard(_user);
+
+var _user2 = __webpack_require__(3);
+
+var _user3 = _interopRequireDefault(_user2);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const routes = new _express.Router();
+
+routes.post('/signup', (0, _expressValidation2.default)(_user3.default.signup), userController.signUp);
+
+exports.default = routes;
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports) {
+
+module.exports = require("express-validation");
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.signUp = signUp;
+
+var _user = __webpack_require__(15);
+
+var _user2 = _interopRequireDefault(_user);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+async function signUp(req, res) {
+  try {
+    const user = await _user2.default.create(req.body);
+    return res.status(201).json(user);
+  } catch (e) {
+    return res.status(500).json(e);
+  }
+}
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _mongoose = __webpack_require__(2);
+
+var _mongoose2 = _interopRequireDefault(_mongoose);
+
+var _validator = __webpack_require__(16);
+
+var _validator2 = _interopRequireDefault(_validator);
+
+var _user = __webpack_require__(3);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const UserSchema = new _mongoose.Schema({
+  email: {
+    type: String,
+    unique: true,
+    required: [true, 'Email is Required'],
+    trim: true,
+    validate: {
+      validator(email) {
+        return _validator2.default.isEmail(email);
+      },
+      message: '{VALUE} is not a valid email'
+    }
+  },
+  userName: {
+    type: String,
+    required: [true, 'Username  is Required'],
+    trim: true,
+    unique: true
+  },
+  firstName: {
+    type: String,
+    required: [true, 'First Name  is Required'],
+    trim: true
+  },
+  lastName: {
+    type: String,
+    required: [true, 'Last Name  is Required'],
+    trim: true
+  },
+  password: {
+    type: String,
+    required: [true, 'Password  is Required'],
+    trim: true,
+    minlength: [6, 'Password need to be longer'],
+    validate: {
+      validator(password) {
+        return _user.passwordReg.test(password);
+      },
+      message: '{VALUE} is not a valid password'
+    }
+  }
+
+});
+
+exports.default = _mongoose2.default.model('User', UserSchema);
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports) {
+
+module.exports = require("validator");
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports) {
+
+module.exports = require("joi");
 
 /***/ })
 /******/ ]);
