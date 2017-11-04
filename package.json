@@ -1,0 +1,12 @@
+{
+  "name": "NodeApi",
+  "version": "1.0.0",
+  "description": "A Node Api Project",
+  "main": "index.js",
+  "repository": "git remote add origin git@github.com:lipeprado/nodeapi.git",
+  "author": "Filipe Prado",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
