@@ -12,7 +12,7 @@
 - User can see all the post they like
 
 
-## Tech
+### Tech
 
 - Node
 - Es6 + ES7
@@ -21,6 +21,8 @@
 - MongoDb
 - Express
 - eslint
+- Mongo Compass
+- Postman
 
 ### Mongo
 
@@ -36,5 +38,11 @@
 - Passport
 - rimraf
 
-=  robomongo, postman
-=  joi for validation with express-validation
+### Token
+
+- Passport JWT
+- jsonWebToken
+
+### Validation
+- joi
+- express-validation
