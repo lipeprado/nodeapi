@@ -30,5 +30,11 @@
 - compression
 - helmet
 
+### Authentication
+
+- Bcrypt
+- Passport
+- rimraf
+
 =  robomongo, postman
 =  joi for validation with express-validation

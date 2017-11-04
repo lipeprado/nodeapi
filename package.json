@@ -7,18 +7,22 @@
   "author": "Filipe Prado",
   "license": "MIT",
   "scripts": {
-    "dev:build": "webpack -w",
+    "clean": "rimraf dist",
+    "dev:build": "yarn run clean && webpack -w",
     "dev": "cross-env NODE_ENV=development nodemon dist/bundle.js"
   },
   "dependencies": {
+    "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.18.2",
     "compression": "^1.7.1",
     "cross-env": "^5.1.1",
     "express": "^4.16.2",
-    "joi": "^13.0.1",
     "express-validation": "^1.0.2",
     "helmet": "^3.9.0",
+    "joi": "^13.0.1",
     "mongoose": "^4.13.0",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
     "validator": "^9.1.1"
   },
   "devDependencies": {
@@ -30,6 +34,7 @@
     "eslint-config-equimper": "^2.2.1",
     "morgan": "^1.9.0",
     "nodemon": "^1.12.1",
+    "rimraf": "^2.6.2",
     "webpack": "^3.8.1",
     "webpack-node-externals": "^1.6.0"
   }
