@@ -9,7 +9,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "dev:build": "yarn run clean && webpack -w",
-    "dev": "cross-env NODE_ENV=development nodemon dist/bundle.js"
+    "dev": "cross-env NODE_ENV=development nodemon dist/bundle.js",
+    "prettier": "prettier --single-quote --print-width 80 --trailing-comma all --write 'src/**/*.js'"
   },
   "dependencies": {
     "bcrypt-nodejs": "^0.0.3",
@@ -37,8 +38,10 @@
     "babel-preset-env": "^1.6.1",
     "eslint": "^4.10.0",
     "eslint-config-equimper": "^2.2.1",
+    "eslint-config-prettier": "^2.7.0",
     "morgan": "^1.9.0",
     "nodemon": "^1.12.1",
+    "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
     "webpack": "^3.8.1",
     "webpack-node-externals": "^1.6.0"

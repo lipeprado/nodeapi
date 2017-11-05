@@ -18,5 +18,4 @@ try {
   mongoose.createConnection(constants.MONGO_URL);
 }
 
-mongoose.connection
-  .once('open', () => console.log('mongoose DB running'));
+mongoose.connection.once('open', () => console.log('mongoose DB running'));

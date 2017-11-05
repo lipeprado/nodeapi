@@ -25,7 +25,7 @@ function envConfig(env) {
   }
 }
 
-export default{
+export default {
   ...defaultConfig,
   ...envConfig(process.env.NODE_ENV),
 };
