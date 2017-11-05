@@ -65,9 +65,11 @@ UserSchema.methods = {
   _hashPassword(password) {
     return hashSync(password);
   },
+
   authenticateUser(password) {
     return compareSync(password, this.password);
   },
+
   createToken() {
     return jwt.sign(
       {
@@ -76,11 +78,19 @@ UserSchema.methods = {
       constants.JWT_SECRET,
     );
   },
-  toJSON() {
+
+  toAuthJSON() {
     return {
       _id: this._id,
       userName: this.userName,
       token: `Bearer ${this.createToken()}`,
+    };
+  },
+
+  toJSON() {
+    return {
+      _id: this._id,
+      userName: this.userName,
     };
   },
 };
