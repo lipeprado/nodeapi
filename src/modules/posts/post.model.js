@@ -64,6 +64,12 @@ PostSchema.statics = {
       user,
     });
   },
+  list({ skip = 0, limit = 2 } = {}) {
+    return this.find()
+      .sort({ createdAt: -1 })
+      .skip(skip).limit(limit)
+      .populate('user');
+  },
 };
 
 export default mongoose.model('Post', PostSchema);
