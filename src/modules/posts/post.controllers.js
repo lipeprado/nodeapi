@@ -15,7 +15,7 @@ export async function getPostById(req, res) {
   try {
     const promise = await Promise.all([
       User.findById(req.user._id),
-      Post.findById(req.params.id).populate('user')
+      Post.findById(req.params.id).populate('user'),
     ]);
 
     const favorite = promise[0]._favorites.isPostIsFavorite(req.params.id);
@@ -45,7 +45,7 @@ export async function getAllPosts(req, res) {
 
       arr.push({
         ...post.toJSON(),
-        favorite
+        favorite,
       });
       return arr;
     }, []);
@@ -79,8 +79,7 @@ export async function deletePost(req, res) {
   try {
     const post = await Post.findById(req.params.id);
     if (!post.user.equals(req.user._id)) {
-      return res
-        .sendStatus(HTTPStatus.UNAUTHORIZED)
+      return res.sendStatus(HTTPStatus.UNAUTHORIZED);
     }
     await post.remove();
     return res.sendStatus(HTTPStatus.OK);
@@ -98,5 +97,3 @@ export async function favoritePost(req, res) {
     return res.status(HTTPStatus.BAD_REQUEST).json(e);
   }
 }
-
-
