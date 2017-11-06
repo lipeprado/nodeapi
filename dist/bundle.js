@@ -238,6 +238,10 @@ var _constants = __webpack_require__(0);
 
 var _constants2 = _interopRequireDefault(_constants);
 
+var _post = __webpack_require__(27);
+
+var _post2 = _interopRequireDefault(_post);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const UserSchema = new _mongoose.Schema({
@@ -280,6 +284,12 @@ const UserSchema = new _mongoose.Schema({
       },
       message: '{VALUE} is not a valid password'
     }
+  },
+  favorites: {
+    posts: [{
+      type: _mongoose.Schema.Types.ObjectId,
+      ref: 'Post'
+    }]
   }
 }, { timestamps: true });
 
@@ -322,6 +332,28 @@ UserSchema.methods = {
       _id: this._id,
       userName: this.userName
     };
+  },
+
+  _favorites: {
+    async posts(postId) {
+      if (this.favorites.posts.indexOf(postId) >= 0) {
+        this.favorites.posts.remove(postId);
+        await _post2.default.decFavoriteCount(postId);
+      } else {
+        this.favorites.posts.push(postId);
+        await _post2.default.incFavoriteCount(postId);
+      }
+
+      return this.save();
+    },
+
+    isPostIsFavorite(postId) {
+      if (this.favorites.posts.indexOf(postId) >= 0) {
+        return true;
+      }
+
+      return false;
+    }
   }
 };
 
@@ -694,10 +726,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const routes = new _express.Router();
 
 routes.post('/', _auth.authJwt, (0, _expressValidation2.default)(_post3.default.createPost), postController.createPost);
-routes.get('/:id', postController.getPostById);
-routes.get('/', postController.getAllPosts);
+routes.get('/:id', _auth.authJwt, postController.getPostById);
+routes.get('/', _auth.authJwt, postController.getAllPosts);
 routes.patch('/:id', _auth.authJwt, (0, _expressValidation2.default)(_post3.default.updatePost), postController.updatePost);
 routes.delete('/:id', _auth.authJwt, postController.deletePost);
+routes.post('/:id/favorite', _auth.authJwt, postController.favoritePost);
 
 exports.default = routes;
 
@@ -716,6 +749,7 @@ exports.getPostById = getPostById;
 exports.getAllPosts = getAllPosts;
 exports.updatePost = updatePost;
 exports.deletePost = deletePost;
+exports.favoritePost = favoritePost;
 
 var _httpStatus = __webpack_require__(30);
 
@@ -724,6 +758,10 @@ var _httpStatus2 = _interopRequireDefault(_httpStatus);
 var _post = __webpack_require__(27);
 
 var _post2 = _interopRequireDefault(_post);
+
+var _user = __webpack_require__(6);
+
+var _user2 = _interopRequireDefault(_user);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -738,8 +776,14 @@ async function createPost(req, res) {
 
 async function getPostById(req, res) {
   try {
-    const post = await _post2.default.findById(req.params.id).populate('user');
-    return res.status(_httpStatus2.default.OK).json(post);
+    const promise = await Promise.all([_user2.default.findById(req.user._id), _post2.default.findById(req.params.id).populate('user')]);
+
+    const favorite = promise[0]._favorites.isPostIsFavorite(req.params.id);
+    const post = promise[1];
+
+    return res.status(_httpStatus2.default.OK).json(Object.assign({}, post.toJSON(), {
+      favorite
+    }));
   } catch (e) {
     return res.status(_httpStatus2.default.BAD_REQUEST).json(e);
   }
@@ -750,7 +794,17 @@ async function getAllPosts(req, res) {
   const skip = parseInt(req.query.skip, 0);
 
   try {
-    const posts = await _post2.default.list({ limit, skip });
+    const promise = await Promise.all([_user2.default.findById(req.user._id), _post2.default.list({ limit, skip })]);
+
+    const posts = promise[1].reduce((arr, post) => {
+      const favorite = promise[0]._favorites.isPostIsFavorite(post._id);
+
+      arr.push(Object.assign({}, post.toJSON(), {
+        favorite
+      }));
+      return arr;
+    }, []);
+
     return res.status(_httpStatus2.default.OK).json(posts);
   } catch (e) {
     return res.status(_httpStatus2.default.BAD_REQUEST).json(e);
@@ -768,7 +822,7 @@ async function updatePost(req, res) {
       post[key] = req.body[key];
     });
 
-    return res.status(_httpStatus2.default.OK).json((await post.save()));
+    return res.sendStatus(_httpStatus2.default.OK).json((await post.save()));
   } catch (e) {
     return res.status(_httpStatus2.default.BAD_REQUEST).json(e);
   }
@@ -778,9 +832,19 @@ async function deletePost(req, res) {
   try {
     const post = await _post2.default.findById(req.params.id);
     if (!post.user.equals(req.user._id)) {
-      return res.status(_httpStatus2.default.UNAUTHORIZED).json('Você não é o Dono desse Post');
+      return res.sendStatus(_httpStatus2.default.UNAUTHORIZED);
     }
     await post.remove();
+    return res.sendStatus(_httpStatus2.default.OK);
+  } catch (e) {
+    return res.status(_httpStatus2.default.BAD_REQUEST).json(e);
+  }
+}
+
+async function favoritePost(req, res) {
+  try {
+    const user = await _user2.default.findById(req.user._id);
+    await user._favorites.posts(req.params.id);
     return res.sendStatus(_httpStatus2.default.OK);
   } catch (e) {
     return res.status(_httpStatus2.default.BAD_REQUEST).json(e);
@@ -875,6 +939,13 @@ PostSchema.statics = {
   },
   list({ skip = 0, limit = 2 } = {}) {
     return this.find().sort({ createdAt: -1 }).skip(skip).limit(limit).populate('user');
+  },
+  incFavoriteCount(postId) {
+    return this.findByIdAndUpdate(postId, { $inc: { favoriteCount: 1 } });
+  },
+
+  decFavoriteCount(postId) {
+    return this.findByIdAndUpdate(postId, { $inc: { favoriteCount: -1 } });
   }
 };
 

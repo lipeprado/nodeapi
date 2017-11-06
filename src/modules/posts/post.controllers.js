@@ -1,5 +1,6 @@
 import HTTPStatus from 'http-status';
 import Post from './post.model';
+import User from '../users/user.model';
 
 export async function createPost(req, res) {
   try {
@@ -12,8 +13,18 @@ export async function createPost(req, res) {
 
 export async function getPostById(req, res) {
   try {
-    const post = await Post.findById(req.params.id).populate('user');
-    return res.status(HTTPStatus.OK).json(post);
+    const promise = await Promise.all([
+      User.findById(req.user._id),
+      Post.findById(req.params.id).populate('user')
+    ]);
+
+    const favorite = promise[0]._favorites.isPostIsFavorite(req.params.id);
+    const post = promise[1];
+
+    return res.status(HTTPStatus.OK).json({
+      ...post.toJSON(),
+      favorite,
+    });
   } catch (e) {
     return res.status(HTTPStatus.BAD_REQUEST).json(e);
   }
@@ -24,7 +35,21 @@ export async function getAllPosts(req, res) {
   const skip = parseInt(req.query.skip, 0);
 
   try {
-    const posts = await Post.list({ limit, skip });
+    const promise = await Promise.all([
+      User.findById(req.user._id),
+      Post.list({ limit, skip }),
+    ]);
+
+    const posts = promise[1].reduce((arr, post) => {
+      const favorite = promise[0]._favorites.isPostIsFavorite(post._id);
+
+      arr.push({
+        ...post.toJSON(),
+        favorite
+      });
+      return arr;
+    }, []);
+
     return res.status(HTTPStatus.OK).json(posts);
   } catch (e) {
     return res.status(HTTPStatus.BAD_REQUEST).json(e);
@@ -44,7 +69,7 @@ export async function updatePost(req, res) {
       post[key] = req.body[key];
     });
 
-    return res.status(HTTPStatus.OK).json(await post.save());
+    return res.sendStatus(HTTPStatus.OK).json(await post.save());
   } catch (e) {
     return res.status(HTTPStatus.BAD_REQUEST).json(e);
   }
@@ -55,8 +80,7 @@ export async function deletePost(req, res) {
     const post = await Post.findById(req.params.id);
     if (!post.user.equals(req.user._id)) {
       return res
-        .status(HTTPStatus.UNAUTHORIZED)
-        .json('Você não é o Dono desse Post');
+        .sendStatus(HTTPStatus.UNAUTHORIZED)
     }
     await post.remove();
     return res.sendStatus(HTTPStatus.OK);
@@ -64,3 +88,15 @@ export async function deletePost(req, res) {
     return res.status(HTTPStatus.BAD_REQUEST).json(e);
   }
 }
+
+export async function favoritePost(req, res) {
+  try {
+    const user = await User.findById(req.user._id);
+    await user._favorites.posts(req.params.id);
+    return res.sendStatus(HTTPStatus.OK);
+  } catch (e) {
+    return res.status(HTTPStatus.BAD_REQUEST).json(e);
+  }
+}
+
+

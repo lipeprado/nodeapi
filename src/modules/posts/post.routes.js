@@ -13,8 +13,8 @@ routes.post(
   validate(postValidation.createPost),
   postController.createPost,
 );
-routes.get('/:id', postController.getPostById);
-routes.get('/', postController.getAllPosts);
+routes.get('/:id', authJwt, postController.getPostById);
+routes.get('/', authJwt, postController.getAllPosts);
 routes.patch(
   '/:id',
   authJwt,
@@ -22,5 +22,6 @@ routes.patch(
   postController.updatePost,
 );
 routes.delete('/:id', authJwt, postController.deletePost);
+routes.post('/:id/favorite', authJwt, postController.favoritePost);
 
 export default routes;
