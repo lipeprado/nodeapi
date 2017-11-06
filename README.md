@@ -44,5 +44,13 @@
 - jsonWebToken
 
 ### Validation
+
 - joi
 - express-validation
+
+### Dev
+
+- Prettier
+- rimraf
+- morgan
+
