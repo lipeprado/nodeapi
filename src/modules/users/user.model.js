@@ -50,11 +50,13 @@ const UserSchema = new Schema(
       },
     },
     favorites: {
-      posts: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Post'
-      }]
-    }
+      posts: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'Post',
+        },
+      ],
+    },
   },
   { timestamps: true },
 );
@@ -122,9 +124,8 @@ UserSchema.methods = {
       }
 
       return false;
-    }
-  }
+    },
+  },
 };
-
 
 export default mongoose.model('User', UserSchema);

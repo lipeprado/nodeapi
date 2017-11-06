@@ -80,7 +80,7 @@ PostSchema.statics = {
 
   decFavoriteCount(postId) {
     return this.findByIdAndUpdate(postId, { $inc: { favoriteCount: -1 } });
-  }
+  },
 };
 
 export default mongoose.model('Post', PostSchema);
